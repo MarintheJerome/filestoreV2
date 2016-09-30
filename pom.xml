@@ -6,7 +6,7 @@
 	<artifactId>filestore</artifactId>
 	<name>The FileStore Application</name>
 	<version>1.0.0-SNAPSHOT</version>
-	<packaging>jar</packaging>
+	<packaging>pom</packaging>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -87,14 +87,14 @@
 				<scope>provided</scope>
 			</dependency>
 			<dependency>
-				<groupId>fr.miage.jayblanc</groupId>
+				<groupId>fr.miage.marinthe</groupId>
 				<artifactId>filestore-ejb</artifactId>
 				<version>${project.version}</version>
 				<type>ejb</type>
 				<scope>provided</scope>
 			</dependency>
 			<dependency>
-				<groupId>fr.miage.jayblanc</groupId>
+				<groupId>fr.miage.marinthe</groupId>
 				<artifactId>filestore-web</artifactId>
 				<version>${project.version}</version>
 				<type>war</type>

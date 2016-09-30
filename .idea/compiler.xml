@@ -22,7 +22,6 @@
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <processorPath useClasspath="true" />
-        <module name="filestore" />
         <module name="filestore-ear" />
         <module name="filestore-ejb" />
         <module name="filestore-web" />
