@@ -2,7 +2,9 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="4f5f4b17-f411-4189-b5b3-ff584e61adfb" name="Default" comment="">
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/compiler.xml" afterPath="$PROJECT_DIR$/.idea/compiler.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/filestore-ear/filestore-ear.iml" afterPath="$PROJECT_DIR$/filestore-ear/filestore-ear.iml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/filestore-ear/pom.xml" afterPath="$PROJECT_DIR$/filestore-ear/pom.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/filestore-ejb/pom.xml" afterPath="$PROJECT_DIR$/filestore-ejb/pom.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/filestore-web/pom.xml" afterPath="$PROJECT_DIR$/filestore-web/pom.xml" />
@@ -653,12 +655,12 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1475242358710</updated>
-      <workItem from="1475242361409" duration="1117000" />
+      <workItem from="1475242361409" duration="1132000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="1117000" />
+    <option name="totallyTimeSpent" value="1132000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="-8" y="-8" width="1616" height="876" extended-state="6" />
