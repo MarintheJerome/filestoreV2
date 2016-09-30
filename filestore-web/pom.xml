@@ -8,7 +8,7 @@
 	<packaging>war</packaging>
 
 	<parent>
-		<groupId>fr.miage.jayblanc</groupId>
+		<groupId>fr.miage.marinthe</groupId>
 		<artifactId>filestore</artifactId>
 		<version>1.0.0-SNAPSHOT</version>
 	</parent>

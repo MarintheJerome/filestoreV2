@@ -2,11 +2,11 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
-	<groupId>fr.miage.jayblanc</groupId>
+	<groupId>fr.miage.marinthe</groupId>
 	<artifactId>filestore</artifactId>
 	<name>The FileStore Application</name>
 	<version>1.0.0-SNAPSHOT</version>
-	<packaging>pom</packaging>
+	<packaging>jar</packaging>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -77,14 +77,12 @@
 	<developers>
 		<developer>
 			<id>jayblanc</id>
-			<name>Jerome Blanchard</name>
-			<email>jerome.blanchard@atilf.fr</email>
-			<url>http://wiki.jayblanc.fr</url>
-			<organization>ATILF - CNRS</organization>
-			<organizationUrl>http://www.atilf.fr</organizationUrl>
+			<name>Jerome Marinthe</name>
+			<email>jerome.marinthe@laposte.net</email>
 			<roles>
 				<role>architect</role>
 				<role>developer</role>
+				<role>body-builder</role>
 			</roles>
 			<timezone>Europe/Paris</timezone>
 		</developer>
