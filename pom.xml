@@ -61,14 +61,12 @@
 	<developers>
 		<developer>
 			<id>jayblanc</id>
-			<name>Jerome Blanchard</name>
-			<email>jerome.blanchard@atilf.fr</email>
-			<url>http://wiki.jayblanc.fr</url>
-			<organization>ATILF - CNRS</organization>
-			<organizationUrl>http://www.atilf.fr</organizationUrl>
+			<name>Jerome Marinthe</name>
+			<email>jerome.marinthe@laposte.net</email>
 			<roles>
 				<role>architect</role>
 				<role>developer</role>
+				<role>body-builder</role>
 			</roles>
 			<timezone>Europe/Paris</timezone>
 		</developer>
