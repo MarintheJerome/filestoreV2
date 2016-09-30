@@ -30,7 +30,7 @@
     </annotationProcessing>
     <bytecodeTargetLevel>
       <module name="filestore" target="1.7" />
-      <module name="filestore-ear" target="1.7" />
+      <module name="filestore-ear" target="1.5" />
       <module name="filestore-ejb" target="1.7" />
       <module name="filestore-web" target="1.7" />
     </bytecodeTargetLevel>
