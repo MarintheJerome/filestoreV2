@@ -1,5 +1,5 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>fr.miage.marinthe</groupId>
@@ -32,7 +32,7 @@
 		<developerConnection>scm:git:git@bitbucket.org:jayblanc/filestore.git</developerConnection>
 		<url>https://bitbucket.org/jayblanc/filestore</url>
 	</scm>
-	
+
 	<repositories>
 		<repository>
 			<id>filestore-maven-repository</id>
@@ -61,12 +61,14 @@
 	<developers>
 		<developer>
 			<id>jayblanc</id>
-			<name>Jerome Marinthe</name>
-			<email>jerome.marinthe@laposte.net</email>
+			<name>Jerome Blanchard</name>
+			<email>jerome.blanchard@atilf.fr</email>
+			<url>http://wiki.jayblanc.fr</url>
+			<organization>ATILF - CNRS</organization>
+			<organizationUrl>http://www.atilf.fr</organizationUrl>
 			<roles>
 				<role>architect</role>
 				<role>developer</role>
-				<role>body-builder</role>
 			</roles>
 			<timezone>Europe/Paris</timezone>
 		</developer>
@@ -108,7 +110,7 @@
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
-	
+
 	<distributionManagement>
 		<repository>
 			<id>filestore-maven-repository</id>
