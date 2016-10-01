@@ -47,12 +47,35 @@ public class FileServiceBean implements FileService {
     }
 
     @Override
+    @TransactionAttribute(TransactionAttributeType.SUPPORTS)
     public FileItem getFile(String id) throws FileServiceException {
-        return null;
+        LOGGER.log(Level.INFO, "Get File called");
+        try {
+            FileItem item = em.find(FileItem.class, id);
+            if (item == null) {
+                throw new FileServiceException("Unable to get file with id '" + id + "' : file does not exists");
+            }
+            return item;
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "An error occured during getting file", e);
+            throw new FileServiceException(e);
+        }
     }
 
     @Override
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void deleteFile(String id) throws FileServiceException {
-
+        LOGGER.log(Level.INFO, "Delete File called");
+        try {
+            FileItem item = em.find(FileItem.class, id);
+            if (item == null) {
+                throw new FileServiceException("Unable to delete file with id '" + id + "' : file does not exists");
+            } else {
+                em.remove(item);
+            }
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "An error occured during deleting file", e);
+            throw new FileServiceException(e);
+        }
     }
 }
