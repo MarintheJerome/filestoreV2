@@ -1,5 +1,7 @@
 package org.filestore.ejb.store;
+import org.filestore.ejb.file.FileService;
 import org.filestore.ejb.file.entity.FileItem;
+import org.filestore.ejb.file.FileServiceBean;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -21,6 +23,8 @@ public class FileItemTest {
     private static Logger LOGGER = Logger.getLogger(FileItemTest.class.getName());
     private static EntityManagerFactory emFactory;
     private static EntityManager em;
+    private static FileService service;
+
     @BeforeClass
     public static void setUp() throws Exception {
         try {
@@ -39,7 +43,11 @@ public class FileItemTest {
             ex.printStackTrace();
             fail("Exception during JPA EntityManager instanciation.");
         }
+        LOGGER.log(Level.INFO, "Building FileService");
+        service = new FileServiceBean();
+        ((FileServiceBean)service).em = em;
     }
+
     @AfterClass
     public static void tearDown() throws Exception {
         LOGGER.log(Level.INFO, "Shuting Hibernate JPA layer.");
