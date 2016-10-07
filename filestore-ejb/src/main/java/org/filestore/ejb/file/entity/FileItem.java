@@ -1,14 +1,13 @@
 package org.filestore.ejb.file.entity;
 
 import javax.persistence.*;
+import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
 
 @Entity
-@NamedQueries(
-		@NamedQuery(name="listAllFiles", query="SELECT i FROM FileItem i")
-)
-public class FileItem {
+@NamedQueries(@NamedQuery(name="listAllFiles", query="SELECT i FROM FileItem i"))
+public class FileItem implements Serializable{
 
 	@Id
 	private String id;
