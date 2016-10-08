@@ -1,10 +1,12 @@
 package org.filestore.ejb.file;
 
 import org.filestore.ejb.file.entity.FileItem;
+import org.filestore.ejb.file.metrics.FileServiceMetricsBean;
 import org.filestore.ejb.store.BinaryStoreService;
 
 import javax.annotation.Resource;
 import javax.ejb.*;
+import javax.interceptor.Interceptors;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import java.io.InputStream;
@@ -17,6 +19,7 @@ import java.util.logging.Logger;
  * Created by jerome on 01/10/2016.
  */
 @Stateless(name = "fileservice")
+@Interceptors(FileServiceMetricsBean.class)
 @Remote(FileService.class)
 public class FileServiceBean implements FileService {
 
