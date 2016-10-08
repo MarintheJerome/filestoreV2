@@ -78,4 +78,17 @@ public class BinaryStoreServiceBean implements BinaryStoreService {
 		}
 	}
 
+	@Override
+	public void delete(String key) throws BinaryStoreServiceException, BinaryStreamNotFoundException {
+		Path file = Paths.get(base.toString(), key);
+		if (!Files.exists(file) ) {
+			throw new BinaryStreamNotFoundException("file not found in storage");
+		}
+		try{
+			Files.delete(file);
+		}
+		catch(IOException e) {
+			throw new BinaryStoreServiceException("unexpected error while opening stream", e);
+		}
+	}
 }
