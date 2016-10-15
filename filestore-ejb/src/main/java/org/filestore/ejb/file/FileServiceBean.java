@@ -11,12 +11,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.annotation.Resource;
-import javax.ejb.EJB;
-import javax.ejb.Remote;
-import javax.ejb.SessionContext;
-import javax.ejb.Stateless;
-import javax.ejb.TransactionAttribute;
-import javax.ejb.TransactionAttributeType;
+import javax.ejb.*;
 import javax.interceptor.Interceptors;
 import javax.mail.Message.RecipientType;
 import javax.mail.MessagingException;
@@ -35,7 +30,7 @@ import org.filestore.ejb.store.BinaryStoreServiceException;
 import org.filestore.ejb.store.BinaryStreamNotFoundException;
 
 @Stateless(name = "fileservice")
-@Remote(FileService.class)
+@Local(FileService.class)
 @Interceptors(FileServiceMetricsBean.class)
 public class FileServiceBean implements FileService {
 

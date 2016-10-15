@@ -1,7 +1,6 @@
 package org.filestore.ejb.file;
 
 import java.io.InputStream;
-import java.io.Serializable;
 import java.util.List;
 
 import org.filestore.ejb.file.entity.FileItem;
