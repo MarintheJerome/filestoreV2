@@ -12,6 +12,7 @@ import javax.annotation.Resource;
 import javax.ejb.*;
 import javax.enterprise.concurrent.ManagedExecutorService;
 import javax.interceptor.Interceptors;
+import javax.mail.Message;
 import javax.mail.Message.RecipientType;
 import javax.mail.MessagingException;
 import javax.mail.Session;
@@ -26,19 +27,28 @@ import org.filestore.ejb.file.metrics.FileServiceMetricsBean;
 import org.filestore.ejb.store.BinaryStoreService;
 import org.filestore.ejb.store.BinaryStoreServiceException;
 import org.filestore.ejb.store.BinaryStreamNotFoundException;
+
 @Stateless(name = "fileservice")
 @Local(FileService.class)
 @Interceptors(FileServiceMetricsBean.class)
 public class FileServiceBean implements FileService {
     private static final Logger LOGGER = Logger.getLogger(FileServiceBean.class.getName());
+
     @PersistenceContext(unitName="filestore-pu")
     public EntityManager em;
+
     @Resource
     protected SessionContext ctx;
+
     @EJB
     public BinaryStoreService store;
+
     @Resource(name = "java:jboss/mail/gmail")
     private Session session;
+
+    @Resource(name = "DefaultManagedExecutorService")
+    protected ManagedExecutorService executor;
+
     @Override
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public String postFile(String owner, List<String> receivers, String message, String name, byte[] data) throws FileServiceException {
@@ -46,6 +56,7 @@ public class FileServiceBean implements FileService {
         String id = this.internalPostFile(owner, receivers, message, name, new ByteArrayInputStream(data));
         return id;
     }
+
     @Override
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public String postFile(String owner, List<String> receivers, String message, String name, InputStream stream) throws FileServiceException {
@@ -53,6 +64,7 @@ public class FileServiceBean implements FileService {
         String id = this.internalPostFile(owner, receivers, message, name, stream);
         return id;
     }
+
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     private String internalPostFile(String owner, List<String> receivers, String message, String name, InputStream stream) throws FileServiceException {
         try {
@@ -66,9 +78,9 @@ public class FileServiceBean implements FileService {
             file.setName(name);
             file.setStream(streamid);
             em.persist(file);
-            notifyOwner(owner, id);
+            executor.submit(new OwnerNotifier(owner, id));
             for ( String receiver : receivers ) {
-                notifyReceiver(receiver, id, message);
+                executor.submit(new ReceiverNotifier(receiver, id, message));
             }
             return id;
         } catch ( BinaryStoreServiceException e ) {
@@ -80,6 +92,7 @@ public class FileServiceBean implements FileService {
             throw new FileServiceException(e);
         }
     }
+
     @Override
     @TransactionAttribute(TransactionAttributeType.SUPPORTS)
     public FileItem getFile(String id) throws FileServiceException {
@@ -95,12 +108,14 @@ public class FileServiceBean implements FileService {
             throw new FileServiceException(e);
         }
     }
+
     @Override
     @TransactionAttribute(TransactionAttributeType.SUPPORTS)
     public InputStream getFileContent(String id) throws FileServiceException {
         LOGGER.log(Level.INFO, "Get File Content called");
         return this.internalGetFileContent(id);
     }
+
     @Override
     @TransactionAttribute(TransactionAttributeType.SUPPORTS)
     public byte[] getWholeFileContent(String id) throws FileServiceException {
@@ -126,6 +141,7 @@ public class FileServiceBean implements FileService {
         }
         return baos.toByteArray();
     }
+
     @TransactionAttribute(TransactionAttributeType.SUPPORTS)
     private InputStream internalGetFileContent(String id) throws FileServiceException {
         try {
@@ -146,6 +162,7 @@ public class FileServiceBean implements FileService {
             throw new FileServiceException(e);
         }
     }
+
     @Override
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void deleteFile(String id) throws FileServiceException {
@@ -167,6 +184,7 @@ public class FileServiceBean implements FileService {
             throw new FileServiceException(e);
         }
     }
+
     private void notifyOwner(String owner, String id) throws MessagingException, UnsupportedEncodingException {
         javax.mail.Message msg = new MimeMessage(session);
         msg.setSubject("Your file has been received");
@@ -176,11 +194,12 @@ public class FileServiceBean implements FileService {
                 + FileStoreConfig.getDownloadBaseUrl() + id, "text/html");
         Transport.send(msg);
         try {
-            Thread.sleep(5000);
+            Thread.sleep(1);
         } catch (InterruptedException e) {
             //
         }
     }
+
     private void notifyReceiver(String receiver, String id, String message) throws MessagingException, UnsupportedEncodingException {
         javax.mail.Message msg = new MimeMessage(session);
         msg.setSubject("Notification");
@@ -194,6 +213,63 @@ public class FileServiceBean implements FileService {
             Thread.sleep(5000);
         } catch (InterruptedException e) {
             //
+        }
+    }
+
+    class OwnerNotifier implements Runnable {
+
+        private String owner;
+        private String id;
+
+        public OwnerNotifier(String owner, String id) {
+            this.owner = owner;
+            this.id = id;
+        }
+
+        @Override
+        public void run() {
+            try {
+                Message msg = new MimeMessage(session);
+                msg.setSubject("Your file has been received");
+                msg.setRecipient(RecipientType.TO,new InternetAddress(owner));
+                msg.setFrom(new InternetAddress("admin@filexchange.org","FileXChange"));
+                msg.setContent("Hi, this mail confirm the upload of your file. The file will be accessible at url : "
+                        + FileStoreConfig.getDownloadBaseUrl() + id, "text/html");
+                Transport.send(msg);
+                Thread.sleep(5000);
+                LOGGER.log(Level.INFO, "notify owner" + owner + "done");
+            } catch ( Exception e ) {
+                LOGGER.log(Level.SEVERE, "unable to notify owner", e);
+            }
+        }
+    }
+
+    class ReceiverNotifier implements Runnable {
+        private String receiver;
+        private String id;
+        private String message;
+
+        public ReceiverNotifier(String receiver, String id, String message) {
+            this.receiver = receiver;
+            this.id = id;
+            this.message = message;
+        }
+
+        @Override
+        public void run() {
+            try {
+                Message msg = new MimeMessage(session);
+                msg.setSubject("Your file has been received");
+                msg.setRecipient(RecipientType.TO,new InternetAddress(receiver));
+                msg.setFrom(new InternetAddress("admin@filexchange.org","FileXChange"));
+                msg.setContent("Hi, this mail confirm the upload of your file. The file will be accessible at url : "
+                        + FileStoreConfig.getDownloadBaseUrl() + id, "text/html");
+                Transport.send(msg);
+                Thread.sleep(5000);
+                LOGGER.log(Level.INFO, "notify receiver" + receiver + "done");
+            } catch ( Exception e ) {
+                LOGGER.log(Level.SEVERE, "unable to notify owner", e);
+            }
         }
     }
 }

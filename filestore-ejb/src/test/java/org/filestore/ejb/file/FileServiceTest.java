@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.enterprise.concurrent.ManagedExecutorService;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
@@ -22,6 +23,7 @@ import org.filestore.ejb.file.entity.FileItem;
 import org.filestore.ejb.store.BinaryStoreService;
 import org.filestore.ejb.store.BinaryStoreServiceException;
 import org.filestore.ejb.store.BinaryStreamNotFoundException;
+import org.hibernate.engine.spi.Managed;
 import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.junit.AfterClass;
@@ -37,6 +39,8 @@ public class FileServiceTest {
     private static FileService service;
 
     private static BinaryStoreService store;
+
+    protected static ManagedExecutorService executor;
     private static Mockery context = new Mockery();
 
     @BeforeClass
@@ -63,6 +67,9 @@ public class FileServiceTest {
 
         store = context.mock(BinaryStoreService.class);
         ((FileServiceBean)service).store = store;
+
+        executor = context.mock(ManagedExecutorService.class);
+        ((FileServiceBean)service).executor = executor;
     }
 
     @AfterClass
@@ -91,8 +98,8 @@ public class FileServiceTest {
 
             context.checking(new Expectations() {{
                 oneOf (store).put(with(any(InputStream.class)));
-                returnValue("fileid");
                 oneOf (store).delete(with(any(String.class)));
+                allowing(executor).submit(with(any(Runnable.class)));
             }});
 
             List<String> receivers = new ArrayList<String> ();
