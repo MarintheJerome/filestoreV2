@@ -1,5 +1,4 @@
 package org.filestore.ejb.file;
-
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -9,9 +8,9 @@ import java.util.List;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
 import javax.annotation.Resource;
 import javax.ejb.*;
+import javax.enterprise.concurrent.ManagedExecutorService;
 import javax.interceptor.Interceptors;
 import javax.mail.Message.RecipientType;
 import javax.mail.MessagingException;
@@ -21,33 +20,25 @@ import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
-
 import org.filestore.ejb.config.FileStoreConfig;
 import org.filestore.ejb.file.entity.FileItem;
 import org.filestore.ejb.file.metrics.FileServiceMetricsBean;
 import org.filestore.ejb.store.BinaryStoreService;
 import org.filestore.ejb.store.BinaryStoreServiceException;
 import org.filestore.ejb.store.BinaryStreamNotFoundException;
-
 @Stateless(name = "fileservice")
 @Local(FileService.class)
 @Interceptors(FileServiceMetricsBean.class)
 public class FileServiceBean implements FileService {
-
     private static final Logger LOGGER = Logger.getLogger(FileServiceBean.class.getName());
-
     @PersistenceContext(unitName="filestore-pu")
-    protected EntityManager em;
-
+    public EntityManager em;
     @Resource
     protected SessionContext ctx;
-
     @EJB
-    protected BinaryStoreService store;
-
+    public BinaryStoreService store;
     @Resource(name = "java:jboss/mail/gmail")
     private Session session;
-
     @Override
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public String postFile(String owner, List<String> receivers, String message, String name, byte[] data) throws FileServiceException {
@@ -55,7 +46,6 @@ public class FileServiceBean implements FileService {
         String id = this.internalPostFile(owner, receivers, message, name, new ByteArrayInputStream(data));
         return id;
     }
-
     @Override
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public String postFile(String owner, List<String> receivers, String message, String name, InputStream stream) throws FileServiceException {
@@ -63,7 +53,6 @@ public class FileServiceBean implements FileService {
         String id = this.internalPostFile(owner, receivers, message, name, stream);
         return id;
     }
-
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     private String internalPostFile(String owner, List<String> receivers, String message, String name, InputStream stream) throws FileServiceException {
         try {
@@ -77,12 +66,10 @@ public class FileServiceBean implements FileService {
             file.setName(name);
             file.setStream(streamid);
             em.persist(file);
-
             notifyOwner(owner, id);
             for ( String receiver : receivers ) {
                 notifyReceiver(receiver, id, message);
             }
-
             return id;
         } catch ( BinaryStoreServiceException e ) {
             LOGGER.log(Level.SEVERE, "An error occured during storing binary content", e);
@@ -93,7 +80,6 @@ public class FileServiceBean implements FileService {
             throw new FileServiceException(e);
         }
     }
-
     @Override
     @TransactionAttribute(TransactionAttributeType.SUPPORTS)
     public FileItem getFile(String id) throws FileServiceException {
@@ -109,14 +95,12 @@ public class FileServiceBean implements FileService {
             throw new FileServiceException(e);
         }
     }
-
     @Override
     @TransactionAttribute(TransactionAttributeType.SUPPORTS)
     public InputStream getFileContent(String id) throws FileServiceException {
         LOGGER.log(Level.INFO, "Get File Content called");
         return this.internalGetFileContent(id);
     }
-
     @Override
     @TransactionAttribute(TransactionAttributeType.SUPPORTS)
     public byte[] getWholeFileContent(String id) throws FileServiceException {
@@ -142,7 +126,6 @@ public class FileServiceBean implements FileService {
         }
         return baos.toByteArray();
     }
-
     @TransactionAttribute(TransactionAttributeType.SUPPORTS)
     private InputStream internalGetFileContent(String id) throws FileServiceException {
         try {
@@ -163,7 +146,6 @@ public class FileServiceBean implements FileService {
             throw new FileServiceException(e);
         }
     }
-
     @Override
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void deleteFile(String id) throws FileServiceException {
@@ -185,7 +167,6 @@ public class FileServiceBean implements FileService {
             throw new FileServiceException(e);
         }
     }
-
     private void notifyOwner(String owner, String id) throws MessagingException, UnsupportedEncodingException {
         javax.mail.Message msg = new MimeMessage(session);
         msg.setSubject("Your file has been received");
@@ -200,7 +181,6 @@ public class FileServiceBean implements FileService {
             //
         }
     }
-
     private void notifyReceiver(String receiver, String id, String message) throws MessagingException, UnsupportedEncodingException {
         javax.mail.Message msg = new MimeMessage(session);
         msg.setSubject("Notification");
@@ -216,5 +196,4 @@ public class FileServiceBean implements FileService {
             //
         }
     }
-
 }
