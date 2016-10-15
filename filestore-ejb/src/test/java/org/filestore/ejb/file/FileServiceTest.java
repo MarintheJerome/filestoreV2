@@ -99,11 +99,11 @@ public class FileServiceTest {
             receivers.add("sheldon@test.com");
             receivers.add("rajesh@test.com");
             receivers.add("penny@test.com");
-            String key = service.postFile("jayblanc@gmail.com", receivers, "Bazinga", "The.Big.Bang.Theory.S06E01.mkv", new ByteArrayInputStream("this should be a uuid".getBytes()));
+            String key = service.postFile("marinthe.jerome54@gmail.com", receivers, "Bazinga", "The.Big.Bang.Theory.S06E01.mkv", new ByteArrayInputStream("this should be a uuid".getBytes()));
             assertNotNull(key);
 
             FileItem item = service.getFile(key);
-            assertEquals("jayblanc@gmail.com", item.getOwner());
+            assertEquals("marinthe.jerome54@gmail.com", item.getOwner());
             assertEquals("Bazinga", item.getMessage());
             assertEquals("The.Big.Bang.Theory.S06E01.mkv", item.getName());
 

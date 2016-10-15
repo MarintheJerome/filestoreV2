@@ -150,7 +150,7 @@
 	<distributionManagement>
 		<repository>
 			<id>filestore-maven-repository</id>
-			<name>Fielstore Releases</name>
+			<name>Filestore Releases</name>
 			<url>http://nexus-jayblanc.rhcloud.com/nexus/content/repositories/releases/</url>
 		</repository>
 		<snapshotRepository>
