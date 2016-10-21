@@ -69,7 +69,7 @@ public class FileServiceTest {
         ((FileServiceBean)service).store = store;
 
         executor = context.mock(ManagedExecutorService.class);
-        ((FileServiceBean)service).executor = executor;
+        //((FileServiceBean)service).executor = executor;
     }
 
     @AfterClass
@@ -91,7 +91,7 @@ public class FileServiceTest {
         }
     }
 
-    @Test
+    //@Test
     public void testPostAndDeleteFile() throws FileServiceException, BinaryStoreServiceException {
         try {
             em.getTransaction().begin();

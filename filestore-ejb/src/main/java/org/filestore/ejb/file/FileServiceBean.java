@@ -3,25 +3,21 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.annotation.Resource;
 import javax.ejb.*;
-import javax.enterprise.concurrent.ManagedExecutorService;
+import javax.inject.Inject;
 import javax.interceptor.Interceptors;
-import javax.mail.Message;
-import javax.mail.Message.RecipientType;
-import javax.mail.MessagingException;
-import javax.mail.Session;
-import javax.mail.Transport;
-import javax.mail.internet.InternetAddress;
-import javax.mail.internet.MimeMessage;
+import javax.jms.JMSContext;
+import javax.jms.Topic;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
-import org.filestore.ejb.config.FileStoreConfig;
+import javax.persistence.TemporalType;
+
 import org.filestore.ejb.file.entity.FileItem;
 import org.filestore.ejb.file.metrics.FileServiceMetricsBean;
 import org.filestore.ejb.store.BinaryStoreService;
@@ -43,11 +39,11 @@ public class FileServiceBean implements FileService {
     @EJB
     public BinaryStoreService store;
 
-    @Resource(name = "java:jboss/mail/gmail")
-    private Session session;
+    @Resource(mappedName = "java:jboss/exported/jms/topic/Mail")
+    private Topic mailTopic;
 
-    @Resource(name = "DefaultManagedExecutorService")
-    protected ManagedExecutorService executor;
+    @Inject
+    private JMSContext jmsctx;
 
     @Override
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
@@ -78,10 +74,8 @@ public class FileServiceBean implements FileService {
             file.setName(name);
             file.setStream(streamid);
             em.persist(file);
-            executor.submit(new OwnerNotifier(owner, id));
-            for ( String receiver : receivers ) {
-                executor.submit(new ReceiverNotifier(receiver, id, message));
-            }
+
+            this.notify(owner, receivers, id, message);
             return id;
         } catch ( BinaryStoreServiceException e ) {
             LOGGER.log(Level.SEVERE, "An error occured during storing binary content", e);
@@ -185,91 +179,24 @@ public class FileServiceBean implements FileService {
         }
     }
 
-    private void notifyOwner(String owner, String id) throws MessagingException, UnsupportedEncodingException {
-        javax.mail.Message msg = new MimeMessage(session);
-        msg.setSubject("Your file has been received");
-        msg.setRecipient(RecipientType.TO,new InternetAddress(owner));
-        msg.setFrom(new InternetAddress("admin@filexchange.org","FileXChange"));
-        msg.setContent("Hi, this mail confirm the upload of your file. The file will be accessible at url : "
-                + FileStoreConfig.getDownloadBaseUrl() + id, "text/html");
-        Transport.send(msg);
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    private void notify(String owner, List<String> receivers, String id, String message) throws FileServiceException {
         try {
-            Thread.sleep(1);
-        } catch (InterruptedException e) {
-            //
-        }
-    }
-
-    private void notifyReceiver(String receiver, String id, String message) throws MessagingException, UnsupportedEncodingException {
-        javax.mail.Message msg = new MimeMessage(session);
-        msg.setSubject("Notification");
-        msg.setRecipient(RecipientType.TO,new InternetAddress(receiver));
-        msg.setFrom(new InternetAddress("admin@filexchange.org","FileXChange"));
-        msg.setContent("Hi, a file has been uploaded for you and is accessible at url : <br/><br/>"
-                + FileStoreConfig.getDownloadBaseUrl() + id + "<br/><br/>"
-                + "The sender lets you a message :<br/><br/>" + message, "text/html");
-        Transport.send(msg);
-        try {
-            Thread.sleep(5000);
-        } catch (InterruptedException e) {
-            //
-        }
-    }
-
-    class OwnerNotifier implements Runnable {
-
-        private String owner;
-        private String id;
-
-        public OwnerNotifier(String owner, String id) {
-            this.owner = owner;
-            this.id = id;
-        }
-
-        @Override
-        public void run() {
-            try {
-                Message msg = new MimeMessage(session);
-                msg.setSubject("Your file has been received");
-                msg.setRecipient(RecipientType.TO,new InternetAddress(owner));
-                msg.setFrom(new InternetAddress("admin@filexchange.org","FileXChange"));
-                msg.setContent("Hi, this mail confirm the upload of your file. The file will be accessible at url : "
-                        + FileStoreConfig.getDownloadBaseUrl() + id, "text/html");
-                Transport.send(msg);
-                Thread.sleep(5000);
-                LOGGER.log(Level.INFO, "notify owner" + owner + "done");
-            } catch ( Exception e ) {
-                LOGGER.log(Level.SEVERE, "unable to notify owner", e);
+            javax.jms.Message msg = jmsctx.createMessage();
+            msg.setStringProperty("owner", owner);
+            StringBuilder receiversBuilder =  new StringBuilder();
+            for ( String receiver : receivers ) {
+                receiversBuilder.append(receiver).append(",");
             }
-        }
-    }
+            receiversBuilder.deleteCharAt(receiversBuilder.lastIndexOf(","));
+            msg.setStringProperty("receivers", receiversBuilder.toString());
+            msg.setStringProperty("id", id);
+            msg.setStringProperty("message", message);
+            jmsctx.createProducer().send(mailTopic, msg);
 
-    class ReceiverNotifier implements Runnable {
-        private String receiver;
-        private String id;
-        private String message;
-
-        public ReceiverNotifier(String receiver, String id, String message) {
-            this.receiver = receiver;
-            this.id = id;
-            this.message = message;
-        }
-
-        @Override
-        public void run() {
-            try {
-                Message msg = new MimeMessage(session);
-                msg.setSubject("Your file has been received");
-                msg.setRecipient(RecipientType.TO,new InternetAddress(receiver));
-                msg.setFrom(new InternetAddress("admin@filexchange.org","FileXChange"));
-                msg.setContent("Hi, this mail confirm the upload of your file. The file will be accessible at url : "
-                        + FileStoreConfig.getDownloadBaseUrl() + id, "text/html");
-                Transport.send(msg);
-                Thread.sleep(5000);
-                LOGGER.log(Level.INFO, "notify receiver" + receiver + "done");
-            } catch ( Exception e ) {
-                LOGGER.log(Level.SEVERE, "unable to notify owner", e);
-            }
+        } catch (Exception e) {
+            LOGGER.log(Level.WARNING, "unable to notify", e);
+            throw new FileServiceException("unable to notify", e);
         }
     }
 }
