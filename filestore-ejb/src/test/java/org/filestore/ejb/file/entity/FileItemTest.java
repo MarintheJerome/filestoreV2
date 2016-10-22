@@ -1,8 +1,10 @@
-package org.filestore.ejb.file;
-import org.filestore.ejb.file.entity.FileItem;
+package org.filestore.ejb.file.entity;
+
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
+
+import javax.ejb.EJB;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
@@ -12,13 +14,17 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import static junit.framework.TestCase.assertNotNull;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
+import static org.junit.Assert.*;
+
+/**
+ * Created by nitix on 30/09/2016.
+ */
 public class FileItemTest {
+
+
     private static Logger LOGGER = Logger.getLogger(FileItemTest.class.getName());
+
     private static EntityManagerFactory emFactory;
     private static EntityManager em;
 
@@ -60,11 +66,12 @@ public class FileItemTest {
             }
         }
     }
-    
+
     @Test
     public void testFileItem() {
         try {
             em.getTransaction().begin();
+
             FileItem file = new FileItem();
             file.setId("myid");
             file.setName("Tagada");
@@ -73,11 +80,14 @@ public class FileItemTest {
             file.setOwner("miage");
             file.setType("text/plain");
             file.setReceivers(new ArrayList<String>());
+
             em.persist(file);
             assertTrue(em.contains(file));
+
             FileItem file2 = em.find(FileItem.class, "myid");
             assertNotNull(file2);
             assertEquals(file, file2);
+
             assertEquals("Tagada", file2.getName());
             file2.setName("A new Name");
             List<String> receivers = new ArrayList<String>();
@@ -87,8 +97,10 @@ public class FileItemTest {
             em.merge(file2);
             FileItem file3 = em.find(FileItem.class, "myid");
             assertEquals("A new Name", file3.getName());
+
             List<FileItem> items = em.createNamedQuery("listAllFiles", FileItem.class).getResultList();
             assertEquals(1, items.size());
+
             FileItem file4 = new FileItem();
             file4.setId("myid2");
             file4.setName("Tagada2");
@@ -101,14 +113,18 @@ public class FileItemTest {
             receivers4.add("user3@test.com");
             file4.setReceivers(receivers4);
             em.persist(file4);
+
             items = em.createNamedQuery("listAllFiles", FileItem.class).getResultList();
             assertEquals(2, items.size());
+
             FileItem file5 = em.find(FileItem.class, "myid2");
             assertEquals(2, file5.getReceivers().size());
-            for ( String receiver : file5.getReceivers() ) {
+            for (String receiver : file5.getReceivers()) {
                 LOGGER.log(Level.INFO, "receiver: " + receiver);
             }
+
             em.getTransaction().commit();
+
         } catch (Exception e) {
             em.getTransaction().rollback();
             LOGGER.log(Level.SEVERE, "error during testing file item", e);

@@ -1,21 +1,21 @@
 package org.filestore.ejb.file;
 
 import org.filestore.ejb.config.FileStoreConfig;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import javax.annotation.Resource;
-import javax.ejb.*;
+import javax.ejb.ActivationConfigProperty;
+import javax.ejb.MessageDriven;
 import javax.jms.MessageListener;
 import javax.mail.Message;
 import javax.mail.Session;
 import javax.mail.Transport;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
-
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 @MessageDriven(name = "FileServiceMailListenerMDB", activationConfig = { @ActivationConfigProperty(propertyName = "destinationType", propertyValue = "javax.jms.Topic"),
-        @ActivationConfigProperty(propertyName = "destination", propertyValue = "jms/topic/Mail"),
+        @ActivationConfigProperty(propertyName = "destination", propertyValue = "jboss/exported/jms/topic/Mail"),
         @ActivationConfigProperty(propertyName = "acknowledgeMode", propertyValue = "Auto-acknowledge") })
 public class FileServiceListenerBean implements MessageListener {
 
@@ -45,7 +45,7 @@ public class FileServiceListenerBean implements MessageListener {
         try {
             Message msg = new MimeMessage(session);
             msg.setSubject("Your file has been received");
-            msg.setRecipient(MimeMessage.RecipientType.TO,new InternetAddress(owner));
+            msg.setRecipient(Message.RecipientType.TO,new InternetAddress(owner));
             msg.setFrom(new InternetAddress("admin@filexchange.org","FileXChange"));
             msg.setContent("Hi, this mail confirm the upload of your file. The file will be accessible at url : "
                     + FileStoreConfig.getDownloadBaseUrl() + id, "text/html");
@@ -60,7 +60,7 @@ public class FileServiceListenerBean implements MessageListener {
         try {
             Message msg = new MimeMessage(session);
             msg.setSubject("Notification");
-            msg.setRecipient(MimeMessage.RecipientType.TO,new InternetAddress(receiver));
+            msg.setRecipient(Message.RecipientType.TO,new InternetAddress(receiver));
             msg.setFrom(new InternetAddress("admin@filexchange.org","FileXChange"));
             msg.setContent("Hi, a file has been uploaded for you and is accessible at url : <br/><br/>"
                     + FileStoreConfig.getDownloadBaseUrl() + id + "<br/><br/>"

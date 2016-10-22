@@ -7,15 +7,16 @@ import org.filestore.ejb.file.entity.FileItem;
 
 public interface FileService {
 
-	String postFile(String owner, List<String> receivers, String message, String name, InputStream stream) throws FileServiceException;
+	public String postFile(String owner, List<String> receivers, String message, String name, InputStream stream) throws FileServiceException;
 
-	FileItem getFile(String id) throws FileServiceException;
+	public String postFile(String owner, List<String> receivers, String message, String name, byte[] data) throws FileServiceException;
 
-	InputStream getFileContent(String id) throws FileServiceException;
+	public FileItem getFile(String id) throws FileServiceException;
 
-	String postFile(String owner, List<String> receivers, String message, String name, byte[] data) throws FileServiceException;
+	public InputStream getFileContent(String id) throws FileServiceException;
 
-	byte[] getWholeFileContent(String id) throws FileServiceException;
+	public byte[] getWholeFileContent(String id) throws FileServiceException;
 
-	void deleteFile(String id) throws FileServiceException;
+	public void deleteFile(String id) throws FileServiceException;
+
 }

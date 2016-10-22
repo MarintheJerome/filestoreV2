@@ -3,12 +3,14 @@ package org.filestore.ejb.file.metrics;
 import org.filestore.ejb.file.FileServiceException;
 
 /**
- * Created by jerome on 08/10/2016.
+ * Created by nitix on 08/10/2016.
  */
 public interface FileServiceMetrics {
-    int getTotalUploads() throws FileServiceException;
 
-    int getTotalDownloads() throws FileServiceException;
+    public int getTotalUploads() throws FileServiceException;
 
-    int getUptime() throws FileServiceException;
+    public int getTotalDownloads() throws FileServiceException;
+
+    public int getUptime() throws FileServiceException;
+
 }

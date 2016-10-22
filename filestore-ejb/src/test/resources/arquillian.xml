@@ -6,7 +6,8 @@
     <container qualifier="wildfly-managed" default="true">
         <configuration>
             <property name="jbossHome">C:\Users\jerome\Downloads\wildfly-10.1.0.Final</property>
-            <property name="serverConfig">standalone-full.xml</property>
+            <property name="managementPort">10990</property>
+            <property name="serverConfig">standalone-full-test.xml</property>
         </configuration>
     </container>
 </arquillian>

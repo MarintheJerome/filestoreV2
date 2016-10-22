@@ -2,6 +2,7 @@ package org.filestore.ejb.file.metrics;
 
 import org.filestore.ejb.file.FileService;
 import org.filestore.ejb.file.FileServiceException;
+import org.filestore.ejb.file.metrics.FileServiceMetrics;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.arquillian.test.api.ArquillianResource;
@@ -20,11 +21,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import static org.junit.Assert.*;
 
-/**
- * Created by jerome on 08/10/2016.
- */
+import static junit.framework.TestCase.assertEquals;
+import static org.junit.Assert.assertNotNull;
+
 @RunWith(Arquillian.class)
 public class FileServiceMetricsTest {
 
@@ -32,10 +32,8 @@ public class FileServiceMetricsTest {
 
     @EJB
     private FileService service;
-
     @EJB
     private FileServiceMetrics metrics;
-
     @ArquillianResource
     InitialContext initialContext;
 
@@ -79,5 +77,6 @@ public class FileServiceMetricsTest {
         int downloadAfter = metrics.getTotalDownloads();
         assertEquals(uploadsAfter, uploadsBefore + 1);
         assertEquals(downloadAfter, downloadsBefore + nbdownloads);
+
     }
 }

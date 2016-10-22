@@ -1,17 +1,15 @@
 package org.filestore.ejb.file.metrics;
 
-import org.filestore.ejb.file.FileServiceException;
+import java.util.logging.Logger;
 
 import javax.ejb.Local;
 import javax.ejb.Startup;
 import javax.ejb.Stateless;
 import javax.interceptor.AroundInvoke;
 import javax.interceptor.InvocationContext;
-import java.util.logging.Logger;
 
-/**
- * Created by jerome on 08/10/2016.
- */
+import org.filestore.ejb.file.FileServiceException;
+
 @Startup
 @Stateless(name = "fileservicemetrics")
 @Local(FileServiceMetrics.class)
@@ -28,13 +26,13 @@ public class FileServiceMetricsBean implements FileServiceMetrics {
         LOGGER.entering(ic.getTarget().toString(), ic.getMethod().getName());
         try {
             Object obj =  ic.proceed();
-            if (ic.getMethod().getName().equals("getFileContent") ) {
+            if ( ic.getMethod().getName().equals("getFileContent") ) {
                 downloads++;
             }
-            if (ic.getMethod().getName().equals("getWholeFileContent") ) {
+            if ( ic.getMethod().getName().equals("getWholeFileContent") ) {
                 downloads++;
             }
-            if (ic.getMethod().getName().equals("postFile") ) {
+            if ( ic.getMethod().getName().equals("postFile") ) {
                 uploads++;
             }
             return obj;
@@ -57,4 +55,5 @@ public class FileServiceMetricsBean implements FileServiceMetrics {
     public int getUptime() throws FileServiceException {
         return (int) (System.currentTimeMillis() - start);
     }
+
 }

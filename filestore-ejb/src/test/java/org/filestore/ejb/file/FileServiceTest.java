@@ -21,9 +21,6 @@ import javax.persistence.RollbackException;
 
 import org.filestore.ejb.file.entity.FileItem;
 import org.filestore.ejb.store.BinaryStoreService;
-import org.filestore.ejb.store.BinaryStoreServiceException;
-import org.filestore.ejb.store.BinaryStreamNotFoundException;
-import org.hibernate.engine.spi.Managed;
 import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.junit.AfterClass;
@@ -40,8 +37,8 @@ public class FileServiceTest {
 
     private static BinaryStoreService store;
 
-    protected static ManagedExecutorService executor;
     private static Mockery context = new Mockery();
+
 
     @BeforeClass
     public static void setUp() throws Exception {
@@ -61,6 +58,7 @@ public class FileServiceTest {
             ex.printStackTrace();
             fail("Exception during JPA EntityManager instanciation.");
         }
+
         LOGGER.log(Level.INFO, "Building FileService");
         service = new FileServiceBean();
         ((FileServiceBean)service).em = em;
@@ -68,8 +66,10 @@ public class FileServiceTest {
         store = context.mock(BinaryStoreService.class);
         ((FileServiceBean)service).store = store;
 
-        executor = context.mock(ManagedExecutorService.class);
-        //((FileServiceBean)service).executor = executor;
+        context.checking(new Expectations() {{
+            oneOf (store).put(with(any(InputStream.class)));
+            oneOf (store).delete(with(any(String.class)));
+        }});
     }
 
     @AfterClass
@@ -91,26 +91,20 @@ public class FileServiceTest {
         }
     }
 
-    //@Test
-    public void testPostAndDeleteFile() throws FileServiceException, BinaryStoreServiceException {
+    @Test
+    public void testPostAndDeleteFile() throws FileServiceException {
         try {
             em.getTransaction().begin();
-
-            context.checking(new Expectations() {{
-                oneOf (store).put(with(any(InputStream.class)));
-                oneOf (store).delete(with(any(String.class)));
-                allowing(executor).submit(with(any(Runnable.class)));
-            }});
 
             List<String> receivers = new ArrayList<String> ();
             receivers.add("sheldon@test.com");
             receivers.add("rajesh@test.com");
             receivers.add("penny@test.com");
-            String key = service.postFile("marinthe.jerome54@gmail.com", receivers, "Bazinga", "The.Big.Bang.Theory.S06E01.mkv", new ByteArrayInputStream("this should be a uuid".getBytes()));
+            String key = service.postFile("jayblanc@gmail.com", receivers, "Bazinga", "The.Big.Bang.Theory.S06E01.mkv", new ByteArrayInputStream( "this should be a uuid".getBytes()));
             assertNotNull(key);
 
             FileItem item = service.getFile(key);
-            assertEquals("marinthe.jerome54@gmail.com", item.getOwner());
+            assertEquals("jayblanc@gmail.com", item.getOwner());
             assertEquals("Bazinga", item.getMessage());
             assertEquals("The.Big.Bang.Theory.S06E01.mkv", item.getName());
 
@@ -121,13 +115,13 @@ public class FileServiceTest {
             } catch ( FileServiceException e ) {
                 //
             }
+
             em.getTransaction().commit();
         }  catch (IllegalStateException | RollbackException e) {
             em.getTransaction().rollback();
             LOGGER.log(Level.SEVERE, "error during testing file service", e);
             fail("Exception during testing file service");
-        } catch (BinaryStreamNotFoundException e) {
-            e.printStackTrace();
         }
     }
+
 }
